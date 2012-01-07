@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.audio.radio_de" name="Radio.de" version="0.0.1" provider-name="Tristan Fischer (sphere)">
+  <requires>
+    <import addon="xbmc.python" version="2.0"/>
+    <import addon="script.module.beautifulsoup" version="3.0.8"/>
+    <import addon="script.module.simplejson" version="2.0.10"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>audio</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary lang="en">Access >4000 radio broadcasts</summary>
+    <description lang="en">Music plugin to access over 4000 german and international radio broadcasts from radio.de[CR]Currently features[CR]- Browse stations by location, genre, topic, country, city and language[CR]- Search for stations</description>
+  </extension>
+</addon>

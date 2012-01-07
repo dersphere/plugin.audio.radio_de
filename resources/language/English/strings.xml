@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="30100">Editorials Recommendations</string>
+    <string id="30101">Top 100 Stations</string>
+    <string id="30102">Genre</string>
+    <string id="30103">Topics</string>
+    <string id="30104">Countrys</string>
+    <string id="30105">Citys</string>
+    <string id="30106">Languages</string>
+	<string id="30107">Local Stations</string>
+	
+	<string id="30200">Search for station</string>
+	<string id="30201">Enter name, country or language</string>
+</strings>
