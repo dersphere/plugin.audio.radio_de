@@ -173,7 +173,6 @@ def get_stream(id):
 def __format_stations(stations):
     __log('__format_stations start')
     items = []
-    type_list = []
     for station in stations:
         if station['picture1Name']:
             thumbnail = station['pictureBaseURL'] + station['picture1Name']
