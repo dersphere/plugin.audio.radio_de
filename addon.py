@@ -35,7 +35,7 @@ class Plugin_mod(Plugin):
         if options.get('is_playable'):
             li.setProperty('IsPlayable', 'true')
         if options.get('context_menu'):
-            li.addContextMenuItems(options['context_menu'])
+            li.addContextMenuItems(options['context_menu'], replaceItems=True)
         return options['url'], li, options.get('is_folder', True)
 
 plugin = Plugin_mod(__addon_name__, __id__, __file__)
@@ -76,6 +76,9 @@ def show_root_menu():
 
     items.append({'label': plugin.get_string(30200),
                   'url': plugin.url_for('search')})
+
+    items.append({'label': plugin.get_string(30108),
+                  'url': plugin.url_for('show_mystations')})
 
     __log('show_root_menu end')
     return plugin.add_items(items)
@@ -160,6 +163,42 @@ def search():
         return plugin.add_items(items)
 
 
+@plugin.route('/my_stations/')
+def show_mystations():
+    __log('show_mystations start')
+    my_station_ids = __get_my_stations()
+    language = __get_language()
+    stations = []
+    for station_id in my_station_ids:
+        stations.append(scraper.get_station_by_station_id(language,
+                                                          station_id))
+    items = __format_stations(stations)
+    __log('show_mystations end')
+    return plugin.add_items(items)
+
+
+@plugin.route('/my_stations/add/<station_id>/')
+def add_station_mystations(station_id):
+    __log('add_station_mystations started with station_id=%s' % station_id)
+    my_stations = __get_my_stations()
+    my_stations.append(station_id)
+    my_stations_string = ','.join(my_stations)
+    plugin.set_setting('my_stations', my_stations_string)
+    __log('add_station_mystations ended with %d items: %s' % (len(my_stations),
+                                                              my_stations))
+
+
+@plugin.route('/my_stations/del/<station_id>/')
+def del_station_mystations(station_id):
+    __log('del_station_mystations started with station_id=%s' % station_id)
+    my_stations = __get_my_stations()
+    my_stations.remove(station_id)
+    my_stations_string = ','.join(my_stations)
+    plugin.set_setting('my_stations', my_stations_string)
+    __log('del_station_mystations ended with %d items: %s' % (len(my_stations),
+                                                              my_stations))
+
+
 @plugin.route('/station/<id>/')
 def get_stream(id):
     __log('get_stream started with id=%s' % id)
@@ -173,11 +212,23 @@ def get_stream(id):
 def __format_stations(stations):
     __log('__format_stations start')
     items = []
+    my_station_ids = __get_my_stations()
     for station in stations:
         if station['picture1Name']:
             thumbnail = station['pictureBaseURL'] + station['picture1Name']
         else:
             thumbnail = ''
+        if not 'genresAndTopics' in station:
+            station['genresAndTopics'] = ','.join(station['genres']
+                                                  + station['topics'])
+        if not str(station['id']) in my_station_ids:
+            my_station_label = plugin.get_string(30400)
+            my_station_url = plugin.url_for('add_station_mystations',
+                                            station_id=str(station['id']))
+        else:
+            my_station_label = plugin.get_string(30401)
+            my_station_url = plugin.url_for('del_station_mystations',
+                                            station_id=str(station['id']))
         items.append({'label': station['name'],
                       'thumbnail': thumbnail,
                       'info': {'Title': station['name'],
@@ -186,12 +237,26 @@ def __format_stations(stations):
                                'Size': station['bitrate'],
                                'tracknumber': station['id'],
                                'comment': station['currentTrack']},
+                      'context_menu': [(my_station_label,
+                                        'XBMC.RunPlugin(%s)'
+                                        % my_station_url), ],
                       'url': plugin.url_for('get_stream',
                                             id=str(station['id'])),
                       'is_folder': False,
                       'is_playable': True})
     __log('__format_stations end')
     return items
+
+
+def __get_my_stations():
+    __log('__get_my_stations start')
+    my_stations = []
+    my_stations_string = plugin.get_setting('my_stations')
+    if my_stations_string:
+        my_stations = my_stations_string.split(',')
+    __log('__get_my_stations ended with %d items: %s' % (len(my_stations),
+                                                         my_stations))
+    return my_stations
 
 
 def __get_language():

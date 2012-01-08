@@ -9,14 +9,19 @@
     <string id="30105">Nach Stadt</string>
     <string id="30106">Nach Sprache</string>
     <string id="30107">Sender in Ihrer Nähe</string>
+    <string id="30108">Meine Sender</string>
 
     <!-- Search -->
     <string id="30200">Nach Sender suchen</string>
     <string id="30201">Name, Sprache, Musikrichtung, Land</string>
-    
+
     <!-- Settings -->
     <string id="30300">Sprache</string>
     <string id="30301">Englisch</string>
     <string id="30302">Deutsch</string>
     <string id="30303">Französisch</string>
+
+    <!-- Context Menu -->
+    <string id="30400">Zu "Meine Sender" hinzufügen</string>
+    <string id="30401">Von "Meine Sender" entfernen</string>
 </strings>

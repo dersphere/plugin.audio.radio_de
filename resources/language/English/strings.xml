@@ -9,6 +9,7 @@
     <string id="30105">Browse by city</string>
     <string id="30106">Browse by language</string>
     <string id="30107">Local Stations</string>
+    <string id="30108">My Stations</string>
 
     <!-- Search -->
     <string id="30200">Search for station</string>
@@ -19,4 +20,8 @@
     <string id="30301">English</string>
     <string id="30302">German</string>
     <string id="30303">French</string>
+    
+    <!-- Context Menu -->
+    <string id="30400">Add to "My Stations"</string>
+    <string id="30401">Remove from "My Stations"</string>
 </strings>

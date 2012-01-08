@@ -9,14 +9,19 @@
     <string id="30105">Naviguer par Ville</string>
     <string id="30106">Naviguer par Langues</string>
     <string id="30107">Radios dans votre région</string>
+    <string id="30108">Mon stations</string>
 
     <!-- Search -->
     <string id="30200">Rechercher</string>
     <string id="30201">genre, thème, pay, ville, langue</string>
-    
+
     <!-- Settings -->
     <string id="30300">Langue</string>
     <string id="30301">Anglais</string>
     <string id="30302">Allemand</string>
     <string id="30303">Français</string>
+
+    <!-- Context Menu -->
+    <string id="30400">Add to "Mon stations"</string>
+    <string id="30401">Remove from "Mon stations"</string>
 </strings>
