@@ -1,10 +1,44 @@
-from xbmcswift import Plugin, xbmc
+from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui, clean_dict
 import resources.lib.scraper as scraper
 
 __addon_name__ = 'Radio.de'
 __id__ = 'plugin.audio.radio_de'
 
-plugin = Plugin(__addon_name__, __id__, __file__)
+
+class Plugin_mod(Plugin):
+
+    def add_items(self, iterable, view_mode=None, sort_method_ids=[]):
+        items = []
+        urls = []
+        for i, li_info in enumerate(iterable):
+            items.append(self._make_listitem(**li_info))
+            if self._mode in ['crawl', 'interactive', 'test']:
+                print '[%d] %s%s%s (%s)' % (i + 1, '', li_info.get('label'),
+                                            '', li_info.get('url'))
+                urls.append(li_info.get('url'))
+        if self._mode is 'xbmc':
+            if view_mode:
+                xbmc.executebuiltin('Container.SetViewMode(%s)' % view_mode)
+            xbmcplugin.addDirectoryItems(self.handle, items, len(items))
+            for id in sort_method_ids:
+                xbmcplugin.addSortMethod(self.handle, id)
+            xbmcplugin.endOfDirectory(self.handle)
+        return urls
+
+    def _make_listitem(self, label, label2='', iconImage='', thumbnail='',
+                       path='', **options):
+        li = xbmcgui.ListItem(label, label2=label2, iconImage=iconImage,
+                              thumbnailImage=thumbnail, path=path)
+        cleaned_info = clean_dict(options.get('info'))
+        if cleaned_info:
+            li.setInfo('music', infoLabels=cleaned_info)
+        if options.get('is_playable'):
+            li.setProperty('IsPlayable', 'true')
+        if options.get('context_menu'):
+            li.addContextMenuItems(options['context_menu'])
+        return options['url'], li, options.get('is_folder', True)
+
+plugin = Plugin_mod(__addon_name__, __id__, __file__)
 
 
 @plugin.route('/', default=True)
@@ -21,23 +55,23 @@ def show_root_menu():
                   'url': plugin.url_for('show_top_stations')})
 
     items.append({'label': plugin.get_string(30102),
-                  'url': plugin.url_for('show_station_category_types',
+                  'url': plugin.url_for('show_station_categories',
                                         category_type='genre')})
 
     items.append({'label': plugin.get_string(30103),
-                  'url': plugin.url_for('show_station_category_types',
+                  'url': plugin.url_for('show_station_categories',
                                         category_type='topic')})
 
     items.append({'label': plugin.get_string(30104),
-                  'url': plugin.url_for('show_station_category_types',
+                  'url': plugin.url_for('show_station_categories',
                                         category_type='country')})
 
     items.append({'label': plugin.get_string(30105),
-                  'url': plugin.url_for('show_station_category_types',
+                  'url': plugin.url_for('show_station_categories',
                                         category_type='city')})
 
     items.append({'label': plugin.get_string(30106),
-                  'url': plugin.url_for('show_station_category_types',
+                  'url': plugin.url_for('show_station_categories',
                                         category_type='language')})
 
     items.append({'label': plugin.get_string(30200),
@@ -50,8 +84,9 @@ def show_root_menu():
 @plugin.route('/local_stations/')
 def show_local_stations():
     __log('show_local_stations start')
-    stations = scraper.get_most_wanted()
-    items = _format_stations(stations['localBroadcasts'])
+    language = __get_language()
+    stations = scraper.get_most_wanted(language)
+    items = __format_stations(stations['localBroadcasts'])
     __log('show_local_stations end')
     return plugin.add_items(items)
 
@@ -59,26 +94,30 @@ def show_local_stations():
 @plugin.route('/recommendation_stations/')
 def show_recommendation_stations():
     __log('show_recommendation_stations start')
-    stations = scraper.get_recommendation_stations()
-    items = _format_stations(stations)
-    __log('show_root_menu end')
+    language = __get_language()
+    stations = scraper.get_recommendation_stations(language)
+    items = __format_stations(stations)
+    __log('show_recommendation_stations end')
     return plugin.add_items(items)
 
 
 @plugin.route('/top_stations/')
 def show_top_stations():
     __log('show_top_stations start')
-    stations = scraper.get_top_stations()
-    items = _format_stations(stations)
-    __log('show_root_menu end')
+    language = __get_language()
+    stations = scraper.get_top_stations(language)
+    items = __format_stations(stations)
+    __log('show_top_stations end')
     return plugin.add_items(items)
 
 
 @plugin.route('/stations_by_category/<category_type>')
-def show_station_category_types(category_type):
-    __log('show_station_category_types started with category_type=%s'
+def show_station_categories(category_type):
+    __log('show_station_categories started with category_type=%s'
           % category_type)
-    categories = scraper.get_categories_by_category_type(category_type)
+    language = __get_language()
+    categories = scraper.get_categories_by_category_type(language,
+                                                         category_type)
     items = []
     for category in categories:
         category = category.encode('utf-8')
@@ -88,8 +127,8 @@ def show_station_category_types(category_type):
                                                 category_type=category_type,
                                                 category=category)})
         except:
-            __log('show_station_category_types EXCEPTION: %s' % repr(category))
-    __log('show_root_menu end')
+            __log('show_station_categories EXCEPTION: %s' % repr(category))
+    __log('show_station_categories end')
     return plugin.add_items(items)
 
 
@@ -97,9 +136,11 @@ def show_station_category_types(category_type):
 def show_stations_by_category(category_type, category):
     __log(('show_stations_by_category started with '
            'category_type=%s, category=%s') % (category_type, category))
-    stations = scraper.get_stations_by_category(category_type, category)
-    items = _format_stations(stations)
-    __log('show_root_menu end')
+    language = __get_language()
+    stations = scraper.get_stations_by_category(language, category_type,
+                                                category)
+    items = __format_stations(stations)
+    __log('show_stations_by_category end')
     return plugin.add_items(items)
 
 
@@ -112,34 +153,54 @@ def search():
     if keyboard.isConfirmed() and keyboard.getText():
         search_string = keyboard.getText().decode('utf8')
         __log('search gots a string: "%s"' % search_string)
-        stations = scraper.search_stations_by_string(search_string)
-        items = _format_stations(stations)
+        language = __get_language()
+        stations = scraper.search_stations_by_string(language, search_string)
+        items = __format_stations(stations)
         __log('search end')
         return plugin.add_items(items)
 
 
-@plugin.route('/stream/<id>/')
-def stream(id):
-    __log('stream started with id=%s' % id)
-    station = scraper.get_station_by_station_id(id)
+@plugin.route('/station/<id>/')
+def get_stream(id):
+    __log('get_stream started with id=%s' % id)
+    language = __get_language()
+    station = scraper.get_station_by_station_id(language, id)
     stream_url = station['streamURL']  # fixme: need to resolve .pls at least
-    __log('stream end with stream_url=%s' % stream_url)
+    __log('get_stream end with stream_url=%s' % stream_url)
     return plugin.set_resolved_url(stream_url)
 
 
-def _format_stations(stations):
-    __log('_format_stations start')
-    items = [{'label': station['name'],
-              'thumbnail': station['pictureBaseURL'] + station['picture1Name'],
-              'info': {'originaltitle': '',
-                       'rating': float(station['rating']),
-                       'genre': station['genresAndTopics']},
-              'url': plugin.url_for('stream', id=str(station['id'])),
-              'is_folder': False,
-              'is_playable': True,
-             } for station in stations]
-    __log('_format_stations end')
+def __format_stations(stations):
+    __log('__format_stations start')
+    items = []
+    type_list = []
+    for station in stations:
+        if station['picture1Name']:
+            thumbnail = station['pictureBaseURL'] + station['picture1Name']
+        else:
+            thumbnail = ''
+        items.append({'label': station['name'],
+                      'thumbnail': thumbnail,
+                      'info': {'Title': station['name'],
+                               'rating': str(station['rating']),
+                               'genre': station['genresAndTopics'],
+                               'Size': station['bitrate'],
+                               'tracknumber': station['id'],
+                               'comment': station['currentTrack']},
+                      'url': plugin.url_for('get_stream',
+                                            id=str(station['id'])),
+                      'is_folder': False,
+                      'is_playable': True})
+    __log('__format_stations end')
     return items
+
+
+def __get_language():
+    if not plugin.get_setting('not_first_run'):
+        plugin.open_settings()
+        plugin.set_setting('not_first_run', '1')
+    lang_id = plugin.get_setting('language')
+    return ('english', 'german', 'french')[int(lang_id)]
 
 
 def __log(text):
