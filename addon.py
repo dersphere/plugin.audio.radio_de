@@ -1,7 +1,7 @@
 from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui, clean_dict
 import resources.lib.scraper as scraper
 
-__addon_name__ = 'Radio.de'
+__addon_name__ = 'Radio'
 __id__ = 'plugin.audio.radio_de'
 
 
