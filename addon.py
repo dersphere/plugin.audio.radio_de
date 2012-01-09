@@ -181,9 +181,10 @@ def show_mystations():
 def add_station_mystations(station_id):
     __log('add_station_mystations started with station_id=%s' % station_id)
     my_stations = __get_my_stations()
-    my_stations.append(station_id)
-    my_stations_string = ','.join(my_stations)
-    plugin.set_setting('my_stations', my_stations_string)
+    if not station_id in my_stations:
+        my_stations.append(station_id)
+        my_stations_string = ','.join(my_stations)
+        plugin.set_setting('my_stations', my_stations_string)
     __log('add_station_mystations ended with %d items: %s' % (len(my_stations),
                                                               my_stations))
 
@@ -192,9 +193,10 @@ def add_station_mystations(station_id):
 def del_station_mystations(station_id):
     __log('del_station_mystations started with station_id=%s' % station_id)
     my_stations = __get_my_stations()
-    my_stations.remove(station_id)
-    my_stations_string = ','.join(my_stations)
-    plugin.set_setting('my_stations', my_stations_string)
+    if station_id in my_stations:
+        my_stations.remove(station_id)
+        my_stations_string = ','.join(my_stations)
+        plugin.set_setting('my_stations', my_stations_string)
     __log('del_station_mystations ended with %d items: %s' % (len(my_stations),
                                                               my_stations))
 
