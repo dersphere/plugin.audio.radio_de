@@ -45,6 +45,9 @@ plugin = Plugin_mod(__addon_name__, __id__, __file__)
 def show_root_menu():
     __log('show_root_menu start')
     items = []
+    items.append({'label': 'M3U DEMO',
+                  'url': plugin.url_for('m3u_demo')})
+
     items.append({'label': plugin.get_string(30107),
                   'url': plugin.url_for('show_local_stations')})
 
@@ -82,6 +85,32 @@ def show_root_menu():
 
     __log('show_root_menu end')
     return plugin.add_items(items)
+
+
+@plugin.route('/m3u_demo/')
+def m3u_demo():
+    __log('m3u_demo start')
+    items = [{'info': {'comment': u'', 'rating': '0', 'Title': u'',
+                       'genre': u'', 'tracknumber': 0, 'Size': 128},
+              'url': 'plugin://plugin.audio.radio_de/m3u_demo_2/',
+              'is_playable': True,
+              'label': u'Bayern 3 WORKS NOT',
+              'is_folder': False,
+              'thumbnail': u'http://static.radio.de/images/broadcasts/2247_io_1.jpeg'},
+             {'info': {'comment': u'', 'rating': '0', 'Title': u'',
+                       'genre': u'', 'tracknumber': 0, 'Size': 128},
+              'url': 'http://streams.br-online.de/bayern3_2.m3u',
+              'is_playable': True,
+              'label': u'Bayern 3 WORKS',
+              'is_folder': False,
+              'thumbnail': u'http://static.radio.de/images/broadcasts/2247_io_1.jpeg'}]
+    __log('m3u_demo end')
+    return plugin.add_items(items)
+
+
+@plugin.route('/m3u_demo_2/')
+def m3u_demo_2():
+    return plugin.set_resolved_url('http://streams.br-online.de/bayern3_2.m3u')
 
 
 @plugin.route('/local_stations/')
