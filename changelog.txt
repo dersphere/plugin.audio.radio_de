@@ -1,4 +1,4 @@
-0.0.5 (unreleased)
+0.0.5 (26.02.2012)
     - Fixed .m3u playlists with empty lines (thx to Malte_Schroeder)
 
 0.0.4 (18.02.2012)
