@@ -170,8 +170,9 @@ def show_mystations():
     language = __get_language()
     stations = []
     for station_id in my_station_ids:
-        stations.append(scraper.get_station_by_station_id(language,
-                                                          station_id))
+        station = scraper.get_station_by_station_id(language, station_id)
+        if station:
+            stations.append(station)
     items = __format_stations(stations)
     __log('show_mystations end')
     return plugin.add_items(items)

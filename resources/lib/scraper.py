@@ -109,10 +109,11 @@ def get_station_by_station_id(language, station_id):
         raise
     gets = {'broadcast': station_id}
     station = __get_json(path, gets, language)
-    if station['streamURL'][-3:] in ('m3u', 'pls'):
-        station['streamURL'] = __resolve_playlist(station['streamURL'])
-    __log('get_station_by_station_id end')
-    return station
+    if 'streamURL' in station:
+        if station['streamURL'][-3:] in ('m3u', 'pls'):
+            station['streamURL'] = __resolve_playlist(station['streamURL'])
+        __log('get_station_by_station_id end')
+        return station
 
 
 def __get_json(path, gets, language):
