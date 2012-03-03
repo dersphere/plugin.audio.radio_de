@@ -105,8 +105,6 @@ def get_station_by_station_id(language, station_id):
     __log('get_station_by_station_id started with language=%s, station_id=%s'
           % (language, station_id))
     path = 'broadcast/getbroadcastembedded'
-    if not station_id:
-        raise
     gets = {'broadcast': station_id}
     station = __get_json(path, gets, language)
     if 'streamURL' in station:
