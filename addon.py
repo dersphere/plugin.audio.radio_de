@@ -7,7 +7,7 @@ __id__ = 'plugin.audio.radio_de'
 
 class Plugin_mod(Plugin):
 
-    def add_items(self, iterable, view_mode=None, sort_method_ids=[]):
+    def add_items(self, iterable, view_mode=None):
         items = []
         urls = []
         for i, li_info in enumerate(iterable):
@@ -20,8 +20,9 @@ class Plugin_mod(Plugin):
             if view_mode:
                 xbmc.executebuiltin('Container.SetViewMode(%s)' % view_mode)
             xbmcplugin.addDirectoryItems(self.handle, items, len(items))
-            for id in sort_method_ids:
-                xbmcplugin.addSortMethod(self.handle, id)
+            xbmcplugin.addSortMethod(self.handle,
+                                     xbmcplugin.SORT_METHOD_UNSORTED,
+                                     label2Mask="%X")
             xbmcplugin.endOfDirectory(self.handle)
         return urls
 
