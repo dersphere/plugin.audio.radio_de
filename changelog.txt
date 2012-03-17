@@ -1,3 +1,11 @@
+0.0.7 (unreleased)
+    - Fixed: error in language_guessing
+
+0.0.6 (unreleased)
+    - Fixed: error if a station was added to the list of mystations but has become unavailable
+    - Improved error catching
+    - Improved: Show bitrate in "kbit/s", not "B"
+
 0.0.5 (26.02.2012)
     - Fixed .m3u playlists with empty lines (thx to Malte_Schroeder)
 
