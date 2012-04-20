@@ -115,7 +115,7 @@ def show_top_stations():
     return plugin.add_items(items)
 
 
-@plugin.route('/stations_by_category/<category_type>')
+@plugin.route('/stations_by_category/<category_type>/')
 def show_station_categories(category_type):
     __log('show_station_categories started with category_type=%s'
           % category_type)
