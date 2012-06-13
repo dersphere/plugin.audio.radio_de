@@ -9,6 +9,7 @@
     <provides>audio</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
+    <language></language>
     <platform>all</platform>
     <summary lang="en">Access &gt;4000 radio broadcasts</summary>
     <summary lang="de">Zugriff auf &gt;4000 Radiosender</summary>
