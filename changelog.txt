@@ -1,3 +1,7 @@
+1.1.0 (unreleased)
+    - New My Station logic (listing should be much faster after initial migration)
+    - Small fixes
+
 1.0.7 (unreleased)
     - Fixed: error in language_guessing
     - Fixed: routes (fix xbmcswift-xbox usecase)
