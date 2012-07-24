@@ -1,4 +1,7 @@
-1.1.0 (unreleased)
+1.1.1 (Unreleased)
+    - Added spanish translation (thx to Patrizia)
+
+1.1.0 (13.07.2012)
     - New My Station logic (listing should be much faster after initial migration)
     - Small fixes
 

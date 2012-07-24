@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <!-- Root menu entries -->
+    <string id="30100">Emisoras recomendadas por los editores</string>
+    <string id="30101">Las 100 mejores emisoras</string>
+    <string id="30102">Buscar por género</string>
+    <string id="30103">Buscar por tema</string>
+    <string id="30104">Buscar por país</string>
+    <string id="30105">Buscar por ciudad</string>
+    <string id="30106">Buscar por idioma</string>
+    <string id="30107">Emisoras cercanas</string>
+    <string id="30108">Mis emisoras</string>
+
+    <!-- Search -->
+    <string id="30200">Buscar una emisora</string>
+    <string id="30201">Escriba el nombre, país o idioma</string>
+    
+    <!-- Settings -->
+    <string id="30300">Idioma</string>
+    <string id="30301">Inglés</string>
+    <string id="30302">Alemán</string>
+    <string id="30303">Francés</string>
+     <!-- Spanish string in Setting "Español" -->
+
+    <!-- Context Menu -->
+    <string id="30400">Añadir a "Mis emisoras"</string>
+    <string id="30401">Quitar de "Mis emisoras"</string>
+</strings>
