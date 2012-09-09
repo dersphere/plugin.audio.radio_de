@@ -254,7 +254,7 @@ def __get_my_stations():
 
 def __set_my_stations(stations):
     __log('__set_my_stations start')
-    profile_path = plugin.cache_path
+    profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
     if not os.path.isdir(profile_path):
         os.makedirs(profile_path)
     ms_file = os.path.join(profile_path, 'mystations.json')
