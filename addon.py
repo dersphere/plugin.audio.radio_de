@@ -81,22 +81,19 @@ def show_root_menu():
 @plugin.route('/local_stations/')
 def show_local_stations():
     stations = radio_api.get_local_stations()
-    items = __format_stations(stations)
-    return plugin.finish(items)
+    return __add_stations(stations)
 
 
 @plugin.route('/recommendation_stations/')
 def show_recommendation_stations():
     stations = radio_api.get_recommendation_stations()
-    items = __format_stations(stations)
-    return plugin.finish(items)
+    return __add_stations(stations)
 
 
 @plugin.route('/top_stations/')
 def show_top_stations():
     stations = radio_api.get_top_stations()
-    items = __format_stations(stations)
-    return plugin.finish(items)
+    return __add_stations(stations)
 
 
 @plugin.route('/stations_by_category/<category_type>/')
@@ -124,8 +121,7 @@ def show_stations_by_category(category_type, category):
            'category_type=%s, category=%s') % (category_type, category))
     stations = radio_api.get_stations_by_category(category_type,
                                                   category)
-    items = __format_stations(stations)
-    return plugin.finish(items)
+    return __add_stations(stations)
 
 
 @plugin.route('/search_station/')
@@ -142,14 +138,12 @@ def search():
 def search_result(search_string):
     __log('search_result started with: %s' % search_string)
     stations = radio_api.search_stations_by_string(search_string)
-    items = __format_stations(stations)
-    return plugin.finish(items)
+    return __add_stations(stations)
 
 
 @plugin.route('/my_stations/')
 def show_mystations():
-    items = __format_stations([s['data'] for s in __get_my_stations()])
-    return plugin.finish(items)
+    return __add_stations([s['data'] for s in __get_my_stations()])
 
 
 @plugin.route('/my_stations/add/<station_id>/')
@@ -185,13 +179,11 @@ def get_stream(station_id):
     return plugin.set_resolved_url(stream_url)
 
 
-def __format_stations(stations):
-    __log('__format_stations start')
+def __add_stations(stations):
+    __log('__add_stations start')
     items = []
     my_station_ids = [s['station_id'] for s in __get_my_stations()]
     for station in stations:
-        if not station:
-            continue
         if station['picture1Name']:
             thumbnail = station['pictureBaseURL'] + station['picture1Name']
         else:
@@ -233,7 +225,7 @@ def __format_stations(stations):
             ),
             'is_playable': True,
         })
-    return items
+    return plugin.finish(items)
 
 
 def __thumb(thumbnail):
@@ -246,7 +238,10 @@ def __get_my_stations():
     profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
     ms_file = os.path.join(profile_path, 'mystations.json')
     if os.path.isfile(ms_file):
-        my_stations = json.load(open(ms_file, 'r'))
+        try:
+            my_stations = json.load(open(ms_file, 'r'))
+        except ValueError:
+            pass
     __log('__get_my_stations ended with %d items' % len(my_stations))
     return my_stations
 
