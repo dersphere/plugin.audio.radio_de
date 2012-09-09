@@ -225,7 +225,10 @@ def __add_stations(stations):
             ),
             'is_playable': True,
         })
-    return plugin.finish(items)
+    if plugin.get_setting('force_viewmode') == 'true':
+        return plugin.finish(items, view_mode='thumbnail')
+    else:
+        return plugin.finish(items)
 
 
 def __thumb(thumbnail):

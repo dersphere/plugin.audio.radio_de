@@ -20,6 +20,7 @@
     <string id="30301">English</string>
     <string id="30302">German</string>
     <string id="30303">French</string>
+    <string id="30310">Force ViewMode to Thumbnail</string>
     
     <!-- Context Menu -->
     <string id="30400">Add to "My Stations"</string>
