@@ -19,7 +19,7 @@
 import os
 import simplejson as json
 
-from xbmcswift import Plugin, xbmc, xbmcplugin, xbmcgui, clean_dict
+from xbmcswift2 import Plugin, xbmc
 
 from resources.lib.api import RadioApi, RadioApiError
 
@@ -43,75 +43,41 @@ STRINGS = {
 }
 
 
-class Plugin_mod(Plugin):
-
-    def add_items(self, iterable, view_mode=None):
-        items = []
-        urls = []
-        for i, li_info in enumerate(iterable):
-            items.append(self._make_listitem(**li_info))
-            if self._mode in ['crawl', 'interactive', 'test']:
-                print '[%d] %s%s%s (%s)' % (i + 1, '', li_info.get('label'),
-                                            '', li_info.get('url'))
-                urls.append(li_info.get('url'))
-        if self._mode is 'xbmc':
-            if view_mode:
-                xbmc.executebuiltin('Container.SetViewMode(%s)' % view_mode)
-            xbmcplugin.addDirectoryItems(self.handle, items, len(items))
-            xbmcplugin.addSortMethod(self.handle,
-                                     xbmcplugin.SORT_METHOD_UNSORTED,
-                                     label2Mask="%X")
-            xbmcplugin.endOfDirectory(self.handle)
-        return urls
-
-    def _make_listitem(self, label, label2='', iconImage='', thumbnail='',
-                       path='', **options):
-        li = xbmcgui.ListItem(label, label2=label2, iconImage=iconImage,
-                              thumbnailImage=thumbnail, path=path)
-        cleaned_info = clean_dict(options.get('info'))
-        if cleaned_info:
-            li.setInfo('music', infoLabels=cleaned_info)
-        if options.get('is_playable'):
-            li.setProperty('IsPlayable', 'true')
-        if options.get('context_menu'):
-            li.addContextMenuItems(options['context_menu'], replaceItems=False)
-        return options['url'], li, options.get('is_folder', True)
-
-plugin = Plugin_mod(__addon_name__, __id__, __file__)
+plugin = Plugin(__addon_name__, __id__, __file__)
 
 
-@plugin.route('/', default=True)
+@plugin.route('/')
 def show_root_menu():
     __log('show_root_menu start')
     items = (
         {'label': _('local_stations'),
-         'url': plugin.url_for('show_local_stations')},
+         'path': plugin.url_for('show_local_stations')},
         {'label': _('editorials_recommendations'),
-         'url': plugin.url_for('show_recommendation_stations')},
+         'path': plugin.url_for('show_recommendation_stations')},
         {'label': _('top_100_stations'),
-         'url': plugin.url_for('show_top_stations')},
+         'path': plugin.url_for('show_top_stations')},
         {'label': _('browse_by_genre'),
-         'url': plugin.url_for('show_station_categories',
-                               category_type='genre')},
+         'path': plugin.url_for('show_station_categories',
+                                category_type='genre')},
         {'label': _('browse_by_topic'),
-         'url': plugin.url_for('show_station_categories',
-                               category_type='topic')},
+         'path': plugin.url_for('show_station_categories',
+                                category_type='topic')},
         {'label': _('browse_by_country'),
-         'url': plugin.url_for('show_station_categories',
-                               category_type='country')},
+         'path': plugin.url_for('show_station_categories',
+                                category_type='country')},
         {'label': _('browse_by_city'),
-         'url': plugin.url_for('show_station_categories',
-                               category_type='city')},
+         'path': plugin.url_for('show_station_categories',
+                                category_type='city')},
         {'label': _('browse_by_language'),
-         'url': plugin.url_for('show_station_categories',
-                               category_type='language')},
+         'path': plugin.url_for('show_station_categories',
+                                category_type='language')},
         {'label': _('search_for_station'),
-         'url': plugin.url_for('search')},
+         'path': plugin.url_for('search')},
         {'label': _('my_stations'),
-         'url': plugin.url_for('show_mystations')},
+         'path': plugin.url_for('show_mystations')},
     )
     __log('show_root_menu end')
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/local_stations/')
@@ -119,7 +85,7 @@ def show_local_stations():
     __log('show_local_stations start')
     stations = radio_api.get_local_stations()
     items = __format_stations(stations)
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/recommendation_stations/')
@@ -127,7 +93,7 @@ def show_recommendation_stations():
     __log('show_recommendation_stations start')
     stations = radio_api.get_recommendation_stations()
     items = __format_stations(stations)
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/top_stations/')
@@ -135,7 +101,7 @@ def show_top_stations():
     __log('show_top_stations start')
     stations = radio_api.get_top_stations()
     items = __format_stations(stations)
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/stations_by_category/<category_type>/')
@@ -148,13 +114,13 @@ def show_station_categories(category_type):
         category = category.encode('utf-8')
         items.append({
             'label': category,
-            'url': plugin.url_for(
+            'path': plugin.url_for(
                 'show_stations_by_category',
                 category_type=category_type,
                 category=category,
             ),
         })
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/stations_by_category/<category_type>/<category>/')
@@ -164,7 +130,7 @@ def show_stations_by_category(category_type, category):
     stations = radio_api.get_stations_by_category(category_type,
                                                   category)
     items = __format_stations(stations)
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/search_station/')
@@ -183,14 +149,14 @@ def search_result(search_string):
     __log('search_station start')
     stations = radio_api.search_stations_by_string(search_string)
     items = __format_stations(stations)
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/my_stations/')
 def show_mystations():
     __log('show_mystations start')
     items = __format_stations([s['data'] for s in __get_my_stations()])
-    return plugin.add_items(items)
+    return plugin.finish(items)
 
 
 @plugin.route('/my_stations/add/<station_id>/')
@@ -231,6 +197,8 @@ def __format_stations(stations):
     items = []
     my_station_ids = [s['station_id'] for s in __get_my_stations()]
     for station in stations:
+        if not station:
+            continue
         if station['picture1Name']:
             thumbnail = station['pictureBaseURL'] + station['picture1Name']
         else:
@@ -256,7 +224,7 @@ def __format_stations(stations):
             'thumbnail': __thumb(thumbnail),
             'info': {
                 'Title': station['name'],
-                'rating': str(station['rating']),
+                'rating': float(station['rating']),
                 'genre': station['genresAndTopics'],
                 'Size': station['bitrate'],
                 'tracknumber': station['id'],
@@ -266,11 +234,10 @@ def __format_stations(stations):
                 my_station_label,
                 'XBMC.RunPlugin(%s)' % my_station_url,
             )],
-            'url': plugin.url_for(
+            'path': plugin.url_for(
                 'get_stream',
                 station_id=str(station['id']),
             ),
-            'is_folder': False,
             'is_playable': True,
         })
     return items
@@ -284,7 +251,7 @@ def __get_my_stations():
     __log('__get_my_stations start')
     __migrate_my_stations()
     my_stations = []
-    profile_path = xbmc.translatePath(plugin._plugin.getAddonInfo('profile'))
+    profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
     ms_file = os.path.join(profile_path, 'mystations.json')
     if os.path.isfile(ms_file):
         my_stations = json.load(open(ms_file, 'r'))
@@ -294,7 +261,7 @@ def __get_my_stations():
 
 def __set_my_stations(stations):
     __log('__set_my_stations start')
-    profile_path = xbmc.translatePath(plugin._plugin.getAddonInfo('profile'))
+    profile_path = plugin.cache_path
     if not os.path.isdir(profile_path):
         os.makedirs(profile_path)
     ms_file = os.path.join(profile_path, 'mystations.json')

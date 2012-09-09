@@ -2,7 +2,7 @@
 <addon id="plugin.audio.radio_de" name="Radio" version="1.1.0" provider-name="Tristan Fischer (sphere@dersphere.de)">
   <requires>
     <import addon="xbmc.python" version="2.0"/>
-    <import addon="script.module.xbmcswift" version="0.2.0"/>
+    <import addon="script.module.xbmcswift2" version="1.1.1" />
     <import addon="script.module.simplejson" version="2.0.10"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="addon.py">
