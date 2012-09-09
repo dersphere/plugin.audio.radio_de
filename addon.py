@@ -242,7 +242,6 @@ def __thumb(thumbnail):
 
 def __get_my_stations():
     __log('__get_my_stations start')
-    __migrate_my_stations()
     my_stations = []
     profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
     ms_file = os.path.join(profile_path, 'mystations.json')
@@ -277,23 +276,6 @@ def __get_language():
         plugin.set_setting('not_first_run', '1')
     lang_id = plugin.get_setting('language')
     return ('english', 'german', 'french')[int(lang_id)]
-
-
-def __migrate_my_stations():
-    if not plugin.get_setting('my_stations'):
-        __log('__migrate_my_stations nothing to migrate')
-        return
-    my_stations = plugin.get_setting('my_stations').split(',')
-    __log('__migrate_my_stations start migration mystations: %s' % my_stations)
-    stations = []
-    for station_id in my_stations:
-        station = radio_api.get_station_by_station_id(station_id)
-        if station:
-            stations.append({'station_id': station_id,
-                             'data': station})
-    __set_my_stations(stations)
-    plugin.set_setting('my_stations', '')
-    __log('__migrate_my_stations migration done')
 
 
 def __log(text):
