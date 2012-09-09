@@ -48,7 +48,6 @@ plugin = Plugin(__addon_name__, __id__, __file__)
 
 @plugin.route('/')
 def show_root_menu():
-    __log('show_root_menu start')
     items = (
         {'label': _('local_stations'),
          'path': plugin.url_for('show_local_stations')},
@@ -76,13 +75,11 @@ def show_root_menu():
         {'label': _('my_stations'),
          'path': plugin.url_for('show_mystations')},
     )
-    __log('show_root_menu end')
     return plugin.finish(items)
 
 
 @plugin.route('/local_stations/')
 def show_local_stations():
-    __log('show_local_stations start')
     stations = radio_api.get_local_stations()
     items = __format_stations(stations)
     return plugin.finish(items)
@@ -90,7 +87,6 @@ def show_local_stations():
 
 @plugin.route('/recommendation_stations/')
 def show_recommendation_stations():
-    __log('show_recommendation_stations start')
     stations = radio_api.get_recommendation_stations()
     items = __format_stations(stations)
     return plugin.finish(items)
@@ -98,7 +94,6 @@ def show_recommendation_stations():
 
 @plugin.route('/top_stations/')
 def show_top_stations():
-    __log('show_top_stations start')
     stations = radio_api.get_top_stations()
     items = __format_stations(stations)
     return plugin.finish(items)
@@ -135,7 +130,6 @@ def show_stations_by_category(category_type, category):
 
 @plugin.route('/search_station/')
 def search():
-    __log('search start')
     keyboard = xbmc.Keyboard('', _('enter_name_country_or_language'))
     keyboard.doModal()
     if keyboard.isConfirmed() and keyboard.getText():
@@ -146,7 +140,7 @@ def search():
 
 @plugin.route('/search_station/<search_string>')
 def search_result(search_string):
-    __log('search_station start')
+    __log('search_result started with: %s' % search_string)
     stations = radio_api.search_stations_by_string(search_string)
     items = __format_stations(stations)
     return plugin.finish(items)
@@ -154,7 +148,6 @@ def search_result(search_string):
 
 @plugin.route('/my_stations/')
 def show_mystations():
-    __log('show_mystations start')
     items = __format_stations([s['data'] for s in __get_my_stations()])
     return plugin.finish(items)
 
