@@ -50,20 +50,20 @@ class RadioApi():
         self.log('get_recommendation_stations started')
         path = 'broadcast/editorialreccomendationsembedded'
         stations = self.__api_call(path)
-        return stations
+        return self.__format_stations(stations)
 
     def get_top_stations(self):
         self.log('get_top_stations started')
         path = 'menu/broadcastsofcategory'
         param = {'category': '_top'}
         stations = self.__api_call(path, param)
-        return stations
+        return self.__format_stations(stations)
 
     def get_local_stations(self, num_entries=25):
         self.log('get_local_stations started with num_entries=%d'
                  % num_entries)
         most_wanted_stations = self._get_most_wanted(num_entries)
-        return most_wanted_stations['localBroadcasts']
+        return self.__format_stations(most_wanted_stations['localBroadcasts'])
 
     def get_category_types(self):
         self.log('get_category_types started')
@@ -90,7 +90,7 @@ class RadioApi():
             'value': category_value,
         }
         stations = self.__api_call(path, param)
-        return stations
+        return self.__format_stations(stations)
 
     def search_stations_by_string(self, search_string):
         self.log('search_stations_by_string started with search_string=%s'
@@ -102,7 +102,7 @@ class RadioApi():
             'rows': '10000',
         }
         stations = self.__api_call(path, param)
-        return stations
+        return self.__format_stations(stations)
 
     def get_station_by_station_id(self, station_id, resolve_playlists=True):
         self.log('get_station_by_station_id started with station_id=%s'
@@ -113,7 +113,8 @@ class RadioApi():
         if resolve_playlists and self.__check_paylist(station['streamURL']):
             playlist_url = station['streamURL']
             station['streamURL'] = self.__resolve_playlist(playlist_url)
-        return station
+        stations = (station, )
+        return self.__format_stations(stations)[0]
 
     def _get_most_wanted(self, num_entries=25):
         self.log('get_most_wanted started with num_entries=%d'
@@ -170,6 +171,32 @@ class RadioApi():
             self.log('__urlopen URLError: %s' % error)
             raise RadioApiError('URLError: %s' % error)
         return response
+
+    @staticmethod
+    def __format_stations(stations):
+        formated_stations = []
+        for station in stations:
+            if station['picture1Name']:
+                thumbnail = station['pictureBaseURL'] + station['picture1Name']
+            else:
+                thumbnail = ''
+            genre = station.get('genresAndTopics') or ','.join(
+                station['genres'] + station['topics'],
+            )
+            if not 'genresAndTopics' in station:
+                station['genresAndTopics'] = ','.join(station['genres']
+                                                      + station['topics'])
+            formated_stations.append({
+                'name': station['name'],
+                'thumbnail': thumbnail,
+                'rating': float(station['rating']),
+                'genre': genre,
+                'bitrate': station['bitrate'],
+                'id': station['id'],
+                'current_track': station['currentTrack'],
+                'stream_url': station.get('streamURL', '')
+            })
+        return formated_stations
 
     @staticmethod
     def __check_paylist(stream_url):

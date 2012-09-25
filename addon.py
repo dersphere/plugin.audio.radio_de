@@ -16,12 +16,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import os
-import simplejson as json
-
 from xbmcswift2 import Plugin, xbmc
 
 from resources.lib.api import RadioApi, RadioApiError
+from resources.lib.file_manager import FileManager
 
 __addon_name__ = 'Radio'
 __id__ = 'plugin.audio.radio_de'
@@ -143,55 +141,37 @@ def search_result(search_string):
 
 @plugin.route('/my_stations/')
 def show_mystations():
-    return __add_stations([s['data'] for s in __get_my_stations()])
+    stations = my_stations_manager.list_elements().values()
+    return __add_stations(stations)
 
 
 @plugin.route('/my_stations/add/<station_id>/')
 def add_station_mystations(station_id):
     __log('add_station_mystations started with station_id=%s' % station_id)
-    my_stations = __get_my_stations()
-    if not station_id in [s['station_id'] for s in my_stations]:
-        station = radio_api.get_station_by_station_id(station_id)
-        my_stations.append({
-            'station_id': station_id,
-            'data': station,
-        })
-        __set_my_stations(my_stations)
-    __log('add_station_mystations ended with %d items' % len(my_stations))
+    station = radio_api.get_station_by_station_id(station_id)
+    my_stations_manager.add_element(station_id, station)
 
 
 @plugin.route('/my_stations/del/<station_id>/')
 def del_station_mystations(station_id):
     __log('del_station_mystations started with station_id=%s' % station_id)
-    my_stations = __get_my_stations()
-    if station_id in [s['station_id'] for s in my_stations]:
-        my_stations = [s for s in my_stations if s['station_id'] != station_id]
-        __set_my_stations(my_stations)
-    __log('del_station_mystations ended with %d items' % len(my_stations))
+    my_stations_manager.del_element(station_id)
 
 
 @plugin.route('/station/<station_id>')
 def get_stream(station_id):
     __log('get_stream started with station_id=%s' % station_id)
     station = radio_api.get_station_by_station_id(station_id)
-    stream_url = station['streamURL'].strip()
+    stream_url = station['stream_url'].strip()
     __log('get_stream end with stream_url=%s' % stream_url)
     return plugin.set_resolved_url(stream_url)
 
 
 def __add_stations(stations):
-    __log('__add_stations start')
+    __log('__add_stations started with %d items' % len(stations))
     items = []
-    my_station_ids = [s['station_id'] for s in __get_my_stations()]
+    my_station_ids = my_stations_manager.list_elements().keys()
     for station in stations:
-        if station['picture1Name']:
-            thumbnail = station['pictureBaseURL'] + station['picture1Name']
-        else:
-            __log('ERROR: Station has no thumb! %s' % station)
-            thumbnail = ''
-        if not 'genresAndTopics' in station:
-            station['genresAndTopics'] = ','.join(station['genres']
-                                                  + station['topics'])
         if not str(station['id']) in my_station_ids:
             my_station_label = _('add_to_my_stations')
             my_station_url = plugin.url_for(
@@ -205,15 +185,15 @@ def __add_stations(stations):
                 station_id=str(station['id']),
             )
         items.append({
-            'label': station['name'],
-            'thumbnail': __thumb(thumbnail),
+            'label': station.get('name', 'UNKNOWN'),
+            'thumbnail': station.get('thumbnail', 'UNKNOWN'),
             'info': {
-                'Title': station['name'],
-                'rating': float(station['rating']),
-                'genre': station['genresAndTopics'],
-                'Size': station['bitrate'],
+                'title': station.get('name', 'UNKNOWN'),
+                'rating': float(station.get('rating', 0)),
+                'genre': station.get('genres', ''),
+                'size': station.get('bitrate', '0'),
                 'tracknumber': station['id'],
-                'comment': station['currentTrack'],
+                'comment': station.get('current_track', ''),
             },
             'context_menu': [(
                 my_station_label,
@@ -229,34 +209,6 @@ def __add_stations(stations):
         return plugin.finish(items, view_mode='thumbnail')
     else:
         return plugin.finish(items)
-
-
-def __thumb(thumbnail):
-    return thumbnail
-    #return thumbnail.replace('_1', '_4')
-
-
-def __get_my_stations():
-    __log('__get_my_stations start')
-    my_stations = []
-    profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
-    ms_file = os.path.join(profile_path, 'mystations.json')
-    if os.path.isfile(ms_file):
-        try:
-            my_stations = json.load(open(ms_file, 'r'))
-        except ValueError:
-            pass
-    __log('__get_my_stations ended with %d items' % len(my_stations))
-    return my_stations
-
-
-def __set_my_stations(stations):
-    __log('__set_my_stations start')
-    profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
-    if not os.path.isdir(profile_path):
-        os.makedirs(profile_path)
-    ms_file = os.path.join(profile_path, 'mystations.json')
-    json.dump(stations, open(ms_file, 'w'), indent=1)
 
 
 def __get_language():
@@ -285,6 +237,10 @@ def __log_api(text):
     xbmc.log('%s api: %s' % (__addon_name__, repr(text)))
 
 
+def __log_ms(text):
+    xbmc.log('%s mystations: %s' % (__addon_name__, repr(text)))
+
+
 def _(string_id):
     if string_id in STRINGS:
         return plugin.get_string(STRINGS[string_id])
@@ -294,6 +250,9 @@ def _(string_id):
 
 if __name__ == '__main__':
     language = __get_language()
+    profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
+    my_stations_manager = FileManager(profile_path, 'mystations2.json')
+    my_stations_manager.log = __log_ms
     radio_api = RadioApi(language=language)
     radio_api.log = __log_api
     try:
