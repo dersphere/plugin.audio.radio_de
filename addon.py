@@ -232,7 +232,8 @@ def __add_stations(stations):
 
 
 def __thumb(thumbnail):
-    return thumbnail.replace('_1', '_4')
+    return thumbnail
+    #return thumbnail.replace('_1', '_4')
 
 
 def __get_my_stations():
