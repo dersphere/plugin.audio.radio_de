@@ -177,6 +177,13 @@ def __add_stations(stations):
                 'XBMC.RunPlugin(%s)' % plugin.url_for('del_station_mystations',
                                                       station_id=station_id),
             )]
+        if 'stream_url' in station:
+            path = station.get('stream_url')
+        else:
+            path = plugin.url_for(
+                'get_stream',
+                station_id=station_id,
+            ),
         items.append({
             'label': station.get('name', 'UNKNOWN'),
             'thumbnail': station.get('thumbnail', 'UNKNOWN'),
@@ -184,15 +191,12 @@ def __add_stations(stations):
                 'title': station.get('name', 'UNKNOWN'),
                 'rating': float(station.get('rating', 0)),
                 'genre': station.get('genres', ''),
-                'size': station.get('bitrate', '0'),
-                'tracknumber': station['id'],
+                'size': station.get('bitrate', 0),
+                'tracknumber': station.get(station['id'], 0),
                 'comment': station.get('current_track', ''),
             },
             'context_menu': context_menu,
-            'path': plugin.url_for(
-                'get_stream',
-                station_id=station_id,
-            ),
+            'path': path,
             'is_playable': True,
         })
     if plugin.get_setting('force_viewmode') == 'true':
