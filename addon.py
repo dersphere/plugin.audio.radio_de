@@ -96,8 +96,6 @@ def show_top_stations():
 
 @plugin.route('/stations_by_category/<category_type>/')
 def show_station_categories(category_type):
-    __log('show_station_categories started with category_type=%s'
-          % category_type)
     categories = radio_api.get_categories(category_type)
     items = []
     for category in categories:
@@ -115,8 +113,6 @@ def show_station_categories(category_type):
 
 @plugin.route('/stations_by_category/<category_type>/<category>/')
 def show_stations_by_category(category_type, category):
-    __log(('show_stations_by_category started with '
-           'category_type=%s, category=%s') % (category_type, category))
     stations = radio_api.get_stations_by_category(category_type,
                                                   category)
     return __add_stations(stations)
@@ -134,7 +130,6 @@ def search():
 
 @plugin.route('/search_station/<search_string>')
 def search_result(search_string):
-    __log('search_result started with: %s' % search_string)
     stations = radio_api.search_stations_by_string(search_string)
     return __add_stations(stations)
 
@@ -147,23 +142,20 @@ def show_mystations():
 
 @plugin.route('/my_stations/add/<station_id>/')
 def add_station_mystations(station_id):
-    __log('add_station_mystations started with station_id=%s' % station_id)
     station = radio_api.get_station_by_station_id(station_id)
     my_stations_manager.add_element(station_id, station)
 
 
 @plugin.route('/my_stations/del/<station_id>/')
 def del_station_mystations(station_id):
-    __log('del_station_mystations started with station_id=%s' % station_id)
     my_stations_manager.del_element(station_id)
 
 
 @plugin.route('/station/<station_id>')
 def get_stream(station_id):
-    __log('get_stream started with station_id=%s' % station_id)
     station = radio_api.get_station_by_station_id(station_id)
     stream_url = station['stream_url'].strip()
-    __log('get_stream end with stream_url=%s' % stream_url)
+    __log('get_stream result: %s' % stream_url)
     return plugin.set_resolved_url(stream_url)
 
 
