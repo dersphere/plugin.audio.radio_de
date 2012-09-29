@@ -243,9 +243,10 @@ def _(string_id):
 if __name__ == '__main__':
     language = __get_language()
     profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
+    user_agent = 'XBMC Addon Radio'
     my_stations_manager = FileManager(profile_path, 'mystations2.json')
     my_stations_manager.log = __log_ms
-    radio_api = RadioApi(language=language)
+    radio_api = RadioApi(language=language, user_agent=user_agent)
     radio_api.log = __log_api
     try:
         plugin.run()

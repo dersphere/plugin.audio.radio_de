@@ -41,10 +41,11 @@ class RadioApi():
 
     PLAYLIST_PREFIXES = ('m3u', 'pls')
 
-    def __init__(self, language='english'):
+    def __init__(self, language='english', user_agent=USER_AGENT):
         if not language in RadioApi.MAIN_URLS.keys():
             raise ValueError('Invalid language')
         self.api_url = RadioApi.MAIN_URLS[language]
+        self.user_agent = user_agent
 
     def get_recommendation_stations(self):
         self.log('get_recommendation_stations started')
@@ -161,7 +162,7 @@ class RadioApi():
     def __urlopen(self, url):
         self.log('__urlopen opening url=%s' % url)
         req = Request(url)
-        req.add_header('User-Agent', RadioApi.USER_AGENT)
+        req.add_header('User-Agent', self.user_agent)
         try:
             response = urlopen(req).read()
         except HTTPError, error:
