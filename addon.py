@@ -164,18 +164,19 @@ def __add_stations(stations):
     items = []
     my_station_ids = my_stations_manager.list_elements().keys()
     for station in stations:
-        if not str(station['id']) in my_station_ids:
-            my_station_label = _('add_to_my_stations')
-            my_station_url = plugin.url_for(
-                'add_station_mystations',
-                station_id=str(station['id']),
-            )
+        station_id = str(station['id'])
+        if not station_id in my_station_ids:
+            context_menu = [(
+                _('add_to_my_stations'),
+                'XBMC.RunPlugin(%s)' % plugin.url_for('add_station_mystations',
+                                                      station_id=station_id),
+            )]
         else:
-            my_station_label = _('remove_from_my_stations')
-            my_station_url = plugin.url_for(
-                'del_station_mystations',
-                station_id=str(station['id']),
-            )
+            context_menu = [(
+                _('remove_from_my_stations'),
+                'XBMC.RunPlugin(%s)' % plugin.url_for('del_station_mystations',
+                                                      station_id=station_id),
+            )]
         items.append({
             'label': station.get('name', 'UNKNOWN'),
             'thumbnail': station.get('thumbnail', 'UNKNOWN'),
@@ -187,13 +188,10 @@ def __add_stations(stations):
                 'tracknumber': station['id'],
                 'comment': station.get('current_track', ''),
             },
-            'context_menu': [(
-                my_station_label,
-                'XBMC.RunPlugin(%s)' % my_station_url,
-            )],
+            'context_menu': context_menu,
             'path': plugin.url_for(
                 'get_stream',
-                station_id=str(station['id']),
+                station_id=station_id,
             ),
             'is_playable': True,
         })
