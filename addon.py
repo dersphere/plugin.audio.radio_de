@@ -293,4 +293,4 @@ if __name__ == '__main__':
     try:
         plugin.run()
     except RadioApiError:
-        __log('ERROR!!!!')
+        plugin.notify(title=__addon_name__, msg=_('network_error'))

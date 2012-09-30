@@ -33,4 +33,7 @@
     <string id="30502">thumbnail url or path</string>
     <string id="30503">stream url</string>
     <string id="30504">Add custom Station...</string>
+
+    <!-- Error Message -->
+    <string id="30600">Network Error</string>
 </strings>

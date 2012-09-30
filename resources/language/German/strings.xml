@@ -33,4 +33,7 @@
     <string id="30502">Thumbnail url oder Pfad</string>
     <string id="30503">Stream url</string>
     <string id="30504">Neuen Sender anlegen...</string>
+
+    <!-- Error Message -->
+    <string id="30600">Netzwerk Fehler</string>
 </strings>
