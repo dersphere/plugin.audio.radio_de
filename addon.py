@@ -175,8 +175,12 @@ def del_station_mystations(station_id):
 
 @plugin.route('/station/<station_id>')
 def get_stream(station_id):
-    station = radio_api.get_station_by_station_id(station_id)
-    stream_url = station['stream_url'].strip()
+    my_stations = my_stations_manager.list_elements()
+    if my_stations.get(station_id, {}).get('is_custom', False):
+        stream_url = my_stations[station_id]['stream_url']
+    else:
+        station = radio_api.get_station_by_station_id(station_id)
+        stream_url = station['stream_url']
     __log('get_stream result: %s' % stream_url)
     return plugin.set_resolved_url(stream_url)
 
@@ -207,17 +211,11 @@ def __add_stations(stations, add_custom=False):
                                                       station_id=station_id),
             )]
         if station.get('is_custom', False):
-            path = station.get('stream_url')
             context_menu.append((
                 _('edit_custom_station'),
                 'XBMC.RunPlugin(%s)' % plugin.url_for('custom_mystation',
                                                       station_id=station_id),
             ))
-        else:
-            path = plugin.url_for(
-                'get_stream',
-                station_id=station_id,
-            )
         items.append({
             'label': station.get('name', 'UNKNOWN'),
             'thumbnail': station.get('thumbnail', 'UNKNOWN'),
@@ -230,7 +228,10 @@ def __add_stations(stations, add_custom=False):
                 'comment': station.get('current_track', ''),
             },
             'context_menu': context_menu,
-            'path': path,
+            'path': plugin.url_for(
+                'get_stream',
+                station_id=station_id,
+            ),
             'is_playable': True,
         })
     if add_custom:
