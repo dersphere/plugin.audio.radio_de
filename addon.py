@@ -38,6 +38,12 @@ STRINGS = {
     'enter_name_country_or_language': 30201,
     'add_to_my_stations': 30400,
     'remove_from_my_stations': 30401,
+    'edit_custom_station': 30402,
+    'please_enter': 30500,
+    'name': 30501,
+    'thumbnail': 30502,
+    'stream_url': 30503,
+    'add_custom': 30504
 }
 
 
@@ -120,10 +126,8 @@ def show_stations_by_category(category_type, category):
 
 @plugin.route('/search_station/')
 def search():
-    keyboard = xbmc.Keyboard('', _('enter_name_country_or_language'))
-    keyboard.doModal()
-    if keyboard.isConfirmed() and keyboard.getText():
-        search_string = keyboard.getText()
+    search_string = __keyboard(_('enter_name_country_or_language'))
+    if search_string:
         url = plugin.url_for('search_result', search_string=search_string)
         plugin.redirect(url)
 
@@ -137,16 +141,34 @@ def search_result(search_string):
 @plugin.route('/my_stations/')
 def show_mystations():
     stations = my_stations_manager.list_elements().values()
-    return __add_stations(stations)
+    return __add_stations(stations, add_custom=True)
 
 
-@plugin.route('/my_stations/add/<station_id>/')
+@plugin.route('/my_stations/custom/<station_id>')
+def custom_mystation(station_id):
+    if station_id == 'new':
+        station = {}
+    else:
+        stations = my_stations_manager.list_elements().values()
+        station = [s for s in stations if s['id'] == station_id][0]
+    for param in ('name', 'thumbnail', 'stream_url'):
+        heading = _('please_enter') % _(param)
+        station[param] = __keyboard(heading, station.get(param, '')) or ''
+    station_id = station['id'] = station.get('name', 'custom')
+    station['is_custom'] = True
+    if station_id:
+        my_stations_manager.add_element(station_id, station)
+        url = plugin.url_for('show_mystations')
+        plugin.redirect(url)
+
+
+@plugin.route('/my_stations/add/<station_id>')
 def add_station_mystations(station_id):
     station = radio_api.get_station_by_station_id(station_id)
     my_stations_manager.add_element(station_id, station)
 
 
-@plugin.route('/my_stations/del/<station_id>/')
+@plugin.route('/my_stations/del/<station_id>')
 def del_station_mystations(station_id):
     my_stations_manager.del_element(station_id)
 
@@ -159,7 +181,14 @@ def get_stream(station_id):
     return plugin.set_resolved_url(stream_url)
 
 
-def __add_stations(stations):
+def __keyboard(title, text=''):
+    keyboard = xbmc.Keyboard(text, title)
+    keyboard.doModal()
+    if keyboard.isConfirmed() and keyboard.getText():
+        return keyboard.getText()
+
+
+def __add_stations(stations, add_custom=False):
     __log('__add_stations started with %d items' % len(stations))
     items = []
     my_station_ids = my_stations_manager.list_elements().keys()
@@ -177,13 +206,18 @@ def __add_stations(stations):
                 'XBMC.RunPlugin(%s)' % plugin.url_for('del_station_mystations',
                                                       station_id=station_id),
             )]
-        if 'stream_url' in station:
+        if station.get('is_custom', False):
             path = station.get('stream_url')
+            context_menu.append((
+                _('edit_custom_station'),
+                'XBMC.RunPlugin(%s)' % plugin.url_for('custom_mystation',
+                                                      station_id=station_id),
+            ))
         else:
             path = plugin.url_for(
                 'get_stream',
                 station_id=station_id,
-            ),
+            )
         items.append({
             'label': station.get('name', 'UNKNOWN'),
             'thumbnail': station.get('thumbnail', 'UNKNOWN'),
@@ -198,6 +232,11 @@ def __add_stations(stations):
             'context_menu': context_menu,
             'path': path,
             'is_playable': True,
+        })
+    if add_custom:
+        items.append({
+            'label': _('add_custom'),
+            'path': plugin.url_for('custom_mystation', station_id='new'),
         })
     if plugin.get_setting('force_viewmode') == 'true':
         return plugin.finish(items, view_mode='thumbnail')
