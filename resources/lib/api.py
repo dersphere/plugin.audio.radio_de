@@ -187,7 +187,7 @@ class RadioApi():
             formated_stations.append({
                 'name': station['name'],
                 'thumbnail': thumbnail,
-                'rating': float(station['rating']),
+                'rating': station['rating'],
                 'genre': genre,
                 'bitrate': station['bitrate'],
                 'id': station['id'],

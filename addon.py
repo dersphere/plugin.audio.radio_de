@@ -76,7 +76,7 @@ def show_root_menu():
         {'label': _('search_for_station'),
          'path': plugin.url_for('search')},
         {'label': _('my_stations'),
-         'path': plugin.url_for('show_mystations')},
+         'path': plugin.url_for('show_my_stations')},
     )
     return plugin.finish(items)
 
@@ -138,13 +138,13 @@ def search_result(search_string):
 
 
 @plugin.route('/my_stations/')
-def show_mystations():
+def show_my_stations():
     stations = my_stations.values()
     return __add_stations(stations, add_custom=True)
 
 
 @plugin.route('/my_stations/custom/<station_id>')
-def custom_mystation(station_id):
+def custom_my_station(station_id):
     if station_id == 'new':
         station = {}
     else:
@@ -157,19 +157,19 @@ def custom_mystation(station_id):
     station['is_custom'] = True
     if station_id:
         my_stations[station_id] = station
-        url = plugin.url_for('show_mystations')
+        url = plugin.url_for('show_my_stations')
         plugin.redirect(url)
 
 
 @plugin.route('/my_stations/add/<station_id>')
-def add_station_mystations(station_id):
+def add_to_my_stations(station_id):
     station = radio_api.get_station_by_station_id(station_id)
     my_stations[station_id] = station
     my_stations.sync()
 
 
 @plugin.route('/my_stations/del/<station_id>')
-def del_station_mystations(station_id):
+def del_from_my_stations(station_id):
     try:
         del my_stations[station_id]
     except KeyError:
@@ -205,30 +205,30 @@ def __add_stations(stations, add_custom=False):
         if not station_id in my_station_ids:
             context_menu = [(
                 _('add_to_my_stations'),
-                'XBMC.RunPlugin(%s)' % plugin.url_for('add_station_mystations',
+                'XBMC.RunPlugin(%s)' % plugin.url_for('add_to_my_stations',
                                                       station_id=station_id),
             )]
         else:
             context_menu = [(
                 _('remove_from_my_stations'),
-                'XBMC.RunPlugin(%s)' % plugin.url_for('del_station_mystations',
+                'XBMC.RunPlugin(%s)' % plugin.url_for('del_from_my_stations',
                                                       station_id=station_id),
             )]
         if station.get('is_custom', False):
             context_menu.append((
                 _('edit_custom_station'),
-                'XBMC.RunPlugin(%s)' % plugin.url_for('custom_mystation',
+                'XBMC.RunPlugin(%s)' % plugin.url_for('custom_my_station',
                                                       station_id=station_id),
             ))
         items.append({
-            'label': station.get('name', 'UNKNOWN'),
-            'thumbnail': station.get('thumbnail', 'UNKNOWN'),
+            'label': station.get('name', ''),
+            'thumbnail': station.get('thumbnail', ''),
             'info': {
-                'title': station.get('name', 'UNKNOWN'),
-                'rating': station.get('rating', 0),
-                'genre': station.get('genres', ''),
+                'title': station.get('name', ''),
+                'rating': str(station.get('rating', '0.0')),
+                'genre': station.get('genre', ''),
                 'size': station.get('bitrate', 0),
-                'tracknumber': station.get(station['id'], 0),
+                'tracknumber': station.get('id', 0),
                 'comment': station.get('current_track', ''),
             },
             'context_menu': context_menu,
@@ -241,7 +241,7 @@ def __add_stations(stations, add_custom=False):
     if add_custom:
         items.append({
             'label': _('add_custom'),
-            'path': plugin.url_for('custom_mystation', station_id='new'),
+            'path': plugin.url_for('custom_my_station', station_id='new'),
         })
     if plugin.get_setting('force_viewmode') == 'true':
         return plugin.finish(items, view_mode='thumbnail')
@@ -273,10 +273,6 @@ def __log(text):
 
 def __log_api(text):
     xbmc.log('%s api: %s' % (__addon_name__, repr(text)))
-
-
-def __log_ms(text):
-    xbmc.log('%s mystations: %s' % (__addon_name__, repr(text)))
 
 
 def _(string_id):
