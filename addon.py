@@ -197,7 +197,7 @@ def __add_stations(stations, add_custom=False):
     __log('__add_stations started with %d items' % len(stations))
     items = []
     my_station_ids = my_stations.keys()
-    for station in stations:
+    for i, station in enumerate(stations):
         station_id = str(station['id'])
         if not station_id in my_station_ids:
             context_menu = [(
@@ -226,6 +226,7 @@ def __add_stations(stations, add_custom=False):
                 'genre': station.get('genre', ''),
                 'size': int(station.get('bitrate', 0)),
                 'comment': station.get('current_track', ''),
+                'count': i,
             },
             'context_menu': context_menu,
             'path': plugin.url_for(
@@ -239,10 +240,16 @@ def __add_stations(stations, add_custom=False):
             'label': _('add_custom'),
             'path': plugin.url_for('custom_my_station', station_id='new'),
         })
+    finish_kwargs = {
+        'sort_methods': [
+            ('UNSORTED', '%X'),
+            ('TITLE', '%X'),
+            'SONG_RATING',
+        ],
+    }
     if plugin.get_setting('force_viewmode') == 'true':
-        return plugin.finish(items, view_mode='thumbnail')
-    else:
-        return plugin.finish(items)
+        finish_kwargs['view_mode'] = 'thumbnail'
+    return plugin.finish(items, **finish_kwargs)
 
 
 def __get_language():
