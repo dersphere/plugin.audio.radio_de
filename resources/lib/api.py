@@ -184,9 +184,6 @@ class RadioApi():
             genre = station.get('genresAndTopics') or ','.join(
                 station['genres'] + station['topics'],
             )
-            if not 'genresAndTopics' in station:
-                station['genresAndTopics'] = ','.join(station['genres']
-                                                      + station['topics'])
             formated_stations.append({
                 'name': station['name'],
                 'thumbnail': thumbnail,
