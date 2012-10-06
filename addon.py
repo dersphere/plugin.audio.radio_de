@@ -81,49 +81,25 @@ def show_root_menu():
     return plugin.finish(items)
 
 
-@plugin.route('/local_stations/')
+@plugin.route('/stations/local/')
 def show_local_stations():
     stations = radio_api.get_local_stations()
     return __add_stations(stations)
 
 
-@plugin.route('/recommendation_stations/')
+@plugin.route('/stations/recommended/')
 def show_recommendation_stations():
     stations = radio_api.get_recommendation_stations()
     return __add_stations(stations)
 
 
-@plugin.route('/top_stations/')
+@plugin.route('/stations/top/')
 def show_top_stations():
     stations = radio_api.get_top_stations()
     return __add_stations(stations)
 
 
-@plugin.route('/stations_by_category/<category_type>/')
-def show_station_categories(category_type):
-    categories = radio_api.get_categories(category_type)
-    items = []
-    for category in categories:
-        category = category.encode('utf-8')
-        items.append({
-            'label': category,
-            'path': plugin.url_for(
-                'show_stations_by_category',
-                category_type=category_type,
-                category=category,
-            ),
-        })
-    return plugin.finish(items)
-
-
-@plugin.route('/stations_by_category/<category_type>/<category>/')
-def show_stations_by_category(category_type, category):
-    stations = radio_api.get_stations_by_category(category_type,
-                                                  category)
-    return __add_stations(stations)
-
-
-@plugin.route('/search_station/')
+@plugin.route('/stations/search/')
 def search():
     search_string = __keyboard(_('enter_name_country_or_language'))
     if search_string:
@@ -131,19 +107,19 @@ def search():
         plugin.redirect(url)
 
 
-@plugin.route('/search_station/<search_string>')
+@plugin.route('/stations/search/<search_string>/')
 def search_result(search_string):
     stations = radio_api.search_stations_by_string(search_string)
     return __add_stations(stations)
 
 
-@plugin.route('/my_stations/')
+@plugin.route('/stations/my/')
 def show_my_stations():
     stations = my_stations.values()
     return __add_stations(stations, add_custom=True)
 
 
-@plugin.route('/my_stations/custom/<station_id>')
+@plugin.route('/stations/my/custom/<station_id>')
 def custom_my_station(station_id):
     if station_id == 'new':
         station = {}
@@ -161,31 +137,52 @@ def custom_my_station(station_id):
         plugin.redirect(url)
 
 
-@plugin.route('/my_stations/add/<station_id>')
+@plugin.route('/stations/my/add/<station_id>')
 def add_to_my_stations(station_id):
     station = radio_api.get_station_by_station_id(station_id)
     my_stations[station_id] = station
     my_stations.sync()
 
 
-@plugin.route('/my_stations/del/<station_id>')
+@plugin.route('/stations/my/del/<station_id>')
 def del_from_my_stations(station_id):
-    try:
+    if station_id in my_stations:
         del my_stations[station_id]
-    except KeyError:
-        pass
-    else:
         my_stations.sync()
 
 
+@plugin.route('/stations/<category_type>/')
+def show_station_categories(category_type):
+    categories = radio_api.get_categories(category_type)
+    items = []
+    for category in categories:
+        category = category.encode('utf-8')
+        items.append({
+            'label': category,
+            'path': plugin.url_for(
+                'show_stations_by_category',
+                category_type=category_type,
+                category=category,
+            ),
+        })
+    return plugin.finish(items)
+
+
+@plugin.route('/stations/<category_type>/<category>/')
+def show_stations_by_category(category_type, category):
+    stations = radio_api.get_stations_by_category(category_type,
+                                                  category)
+    return __add_stations(stations)
+
+
 @plugin.route('/station/<station_id>')
-def get_stream(station_id):
+def get_stream_url(station_id):
     if my_stations.get(station_id, {}).get('is_custom', False):
         stream_url = my_stations[station_id]['stream_url']
     else:
         station = radio_api.get_station_by_station_id(station_id)
         stream_url = station['stream_url']
-    __log('get_stream result: %s' % stream_url)
+    __log('get_stream_url result: %s' % stream_url)
     return plugin.set_resolved_url(stream_url)
 
 
@@ -232,7 +229,7 @@ def __add_stations(stations, add_custom=False):
             },
             'context_menu': context_menu,
             'path': plugin.url_for(
-                'get_stream',
+                'get_stream_url',
                 station_id=station_id,
             ),
             'is_playable': True,
