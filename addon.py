@@ -17,9 +17,7 @@
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from xbmcswift2 import Plugin, xbmc
-
 from resources.lib.api import RadioApi, RadioApiError
-from resources.lib.file_manager import FileManager
 
 __addon_name__ = 'Radio'
 __id__ = 'plugin.audio.radio_de'
@@ -48,6 +46,7 @@ STRINGS = {
 
 
 plugin = Plugin(__addon_name__, __id__, __file__)
+my_stations = plugin.get_storage('my_stations.json', file_format='json')
 
 
 @plugin.route('/')
@@ -140,7 +139,7 @@ def search_result(search_string):
 
 @plugin.route('/my_stations/')
 def show_mystations():
-    stations = my_stations_manager.list_elements().values()
+    stations = my_stations.values()
     return __add_stations(stations, add_custom=True)
 
 
@@ -149,7 +148,7 @@ def custom_mystation(station_id):
     if station_id == 'new':
         station = {}
     else:
-        stations = my_stations_manager.list_elements().values()
+        stations = my_stations.values()
         station = [s for s in stations if s['id'] == station_id][0]
     for param in ('name', 'thumbnail', 'stream_url'):
         heading = _('please_enter') % _(param)
@@ -157,7 +156,7 @@ def custom_mystation(station_id):
     station_id = station['id'] = station.get('name', 'custom')
     station['is_custom'] = True
     if station_id:
-        my_stations_manager.add_element(station_id, station)
+        my_stations[station_id] = station
         url = plugin.url_for('show_mystations')
         plugin.redirect(url)
 
@@ -165,17 +164,22 @@ def custom_mystation(station_id):
 @plugin.route('/my_stations/add/<station_id>')
 def add_station_mystations(station_id):
     station = radio_api.get_station_by_station_id(station_id)
-    my_stations_manager.add_element(station_id, station)
+    my_stations[station_id] = station
+    my_stations.sync()
 
 
 @plugin.route('/my_stations/del/<station_id>')
 def del_station_mystations(station_id):
-    my_stations_manager.del_element(station_id)
+    try:
+        del my_stations[station_id]
+    except KeyError:
+        pass
+    else:
+        my_stations.sync()
 
 
 @plugin.route('/station/<station_id>')
 def get_stream(station_id):
-    my_stations = my_stations_manager.list_elements()
     if my_stations.get(station_id, {}).get('is_custom', False):
         stream_url = my_stations[station_id]['stream_url']
     else:
@@ -195,7 +199,7 @@ def __keyboard(title, text=''):
 def __add_stations(stations, add_custom=False):
     __log('__add_stations started with %d items' % len(stations))
     items = []
-    my_station_ids = my_stations_manager.list_elements().keys()
+    my_station_ids = my_stations.keys()
     for station in stations:
         station_id = str(station['id'])
         if not station_id in my_station_ids:
@@ -221,7 +225,7 @@ def __add_stations(stations, add_custom=False):
             'thumbnail': station.get('thumbnail', 'UNKNOWN'),
             'info': {
                 'title': station.get('name', 'UNKNOWN'),
-                'rating': float(station.get('rating', 0)),
+                'rating': station.get('rating', 0),
                 'genre': station.get('genres', ''),
                 'size': station.get('bitrate', 0),
                 'tracknumber': station.get(station['id'], 0),
@@ -284,11 +288,7 @@ def _(string_id):
 
 if __name__ == '__main__':
     language = __get_language()
-    profile_path = xbmc.translatePath(plugin._addon.getAddonInfo('profile'))
-    user_agent = 'XBMC Addon Radio'
-    my_stations_manager = FileManager(profile_path, 'mystations2.json')
-    my_stations_manager.log = __log_ms
-    radio_api = RadioApi(language=language, user_agent=user_agent)
+    radio_api = RadioApi(language=language, user_agent='XBMC Addon Radio')
     radio_api.log = __log_api
     try:
         plugin.run()
