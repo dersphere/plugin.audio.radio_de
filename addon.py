@@ -266,7 +266,7 @@ def __get_language():
         else:
             plugin.open_settings()
         plugin.set_setting('not_first_run', '1')
-    lang_id = plugin.get_setting('language')
+    lang_id = plugin.get_setting('language') or 0
     return ('english', 'german', 'french')[int(lang_id)]
 
 
