@@ -1,3 +1,11 @@
+2.0.0 (unreleased)
+    - Code Rewrite
+    - Possibility to add custom (user defined) Stations
+    - Thumbnail View (You can disable in the add-on settings)
+    - Change to the xbmcswift2 framework
+    - New Icon
+    - Possibilty to add Stations to the XBMC Favorites
+
 1.1.1 (Unreleased)
     - Added spanish translation (thx to Patrizia)
 
