@@ -46,6 +46,7 @@ STRINGS = {
 
 
 plugin = Plugin(__addon_name__, __id__, __file__)
+radio_api = RadioApi()
 my_stations = plugin.get_storage('my_stations.json', file_format='json')
 
 
@@ -130,7 +131,7 @@ def custom_my_station(station_id):
         heading = _('please_enter') % _(param)
         station[param] = __keyboard(heading, station.get(param, '')) or ''
     station_id = station['id'] = station.get('name', 'custom')
-    station['is_custom'] = True
+    station['is_custom'] = '1'
     if station_id:
         my_stations[station_id] = station
         url = plugin.url_for('show_my_stations')
@@ -286,8 +287,7 @@ def _(string_id):
         return string_id
 
 if __name__ == '__main__':
-    language = __get_language()
-    radio_api = RadioApi(language=language, user_agent='XBMC Addon Radio')
+    radio_api.set_language(__get_language())
     radio_api.log = __log_api
     try:
         plugin.run()

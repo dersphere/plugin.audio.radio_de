@@ -37,15 +37,18 @@ class RadioApi():
         'genre', 'topic', 'country', 'city', 'language',
     )
 
-    USER_AGENT = 'radio.de 1.9.1 rv:37 (iPhone; iPhone OS 5.0; de_DE)'
+    USER_AGENT = 'XBMC Addon Radio'
 
     PLAYLIST_PREFIXES = ('m3u', 'pls')
 
     def __init__(self, language='english', user_agent=USER_AGENT):
+        self.set_language(language)
+        self.user_agent = user_agent
+
+    def set_language(self, language):
         if not language in RadioApi.MAIN_URLS.keys():
             raise ValueError('Invalid language')
         self.api_url = RadioApi.MAIN_URLS[language]
-        self.user_agent = user_agent
 
     def get_recommendation_stations(self):
         self.log('get_recommendation_stations started')
