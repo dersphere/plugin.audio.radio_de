@@ -19,9 +19,6 @@
 from xbmcswift2 import Plugin, xbmc
 from resources.lib.api import RadioApi, RadioApiError
 
-__addon_name__ = 'Radio'
-__id__ = 'plugin.audio.radio_de'
-
 STRINGS = {
     'editorials_recommendations': 30100,
     'top_100_stations': 30101,
@@ -45,7 +42,7 @@ STRINGS = {
 }
 
 
-plugin = Plugin(__addon_name__, __id__, __file__)
+plugin = Plugin()
 radio_api = RadioApi()
 my_stations = plugin.get_storage('my_stations.json', file_format='json')
 
@@ -272,11 +269,7 @@ def __get_language():
 
 
 def __log(text):
-    xbmc.log('%s plugin: %s' % (__addon_name__, repr(text)))
-
-
-def __log_api(text):
-    xbmc.log('%s api: %s' % (__addon_name__, repr(text)))
+    plugin.log.info(text)
 
 
 def _(string_id):
@@ -288,8 +281,8 @@ def _(string_id):
 
 if __name__ == '__main__':
     radio_api.set_language(__get_language())
-    radio_api.log = __log_api
+    radio_api.log = __log
     try:
         plugin.run()
     except RadioApiError:
-        plugin.notify(title=__addon_name__, msg=_('network_error'))
+        plugin.notify(msg=_('network_error'))
