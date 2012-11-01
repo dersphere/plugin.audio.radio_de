@@ -251,6 +251,26 @@ def __add_stations(stations, add_custom=False):
     return plugin.finish(items, **finish_kwargs)
 
 
+def migrate_my_stations():
+    __log('migrate_my_stations')
+    if not plugin.get_setting('migrate') == 'done':
+        import os
+        import simplejson as json
+        profile_path = xbmc.translatePath(
+            plugin._addon.getAddonInfo('profile')
+        )
+        ms_file = os.path.join(profile_path, 'mystations.json')
+        if os.path.isfile(ms_file):
+            my_stations_old = json.load(open(ms_file, 'r'))
+            for old_station in my_stations_old:
+                station_id = old_station['station_id']
+                __log('migrating: %s' % station_id)
+                station = radio_api.get_station_by_station_id(station_id)
+                my_stations[station_id] = station
+            my_stations.sync()
+        plugin.set_setting('migrate', 'done')
+
+
 def __get_language():
     if not plugin.get_setting('not_first_run'):
         xbmc_language = xbmc.getLanguage().lower()
@@ -283,6 +303,7 @@ def _(string_id):
 if __name__ == '__main__':
     radio_api.set_language(__get_language())
     radio_api.log = __log
+    migrate_my_stations()
     try:
         plugin.run()
     except RadioApiError:
