@@ -252,8 +252,8 @@ def __add_stations(stations, add_custom=False):
 
 
 def migrate_my_stations():
-    __log('migrate_my_stations')
     if not plugin.get_setting('migrate') == 'done':
+        __log('migrate_my_stations')
         import os
         import simplejson as json
         profile_path = xbmc.translatePath(
