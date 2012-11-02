@@ -127,7 +127,9 @@ def custom_my_station(station_id):
     for param in ('name', 'thumbnail', 'stream_url'):
         heading = _('please_enter') % _(param)
         station[param] = __keyboard(heading, station.get(param, '')) or ''
-    station_id = station['id'] = station.get('name', 'custom')
+    station_name = station.get('name', 'custom')
+    station_id = station_name.decode('ascii', 'ignore').encode('ascii')
+    station['id'] = station_id
     station['is_custom'] = '1'
     if station_id:
         my_stations[station_id] = station
