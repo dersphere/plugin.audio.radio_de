@@ -1,5 +1,6 @@
 2.0.1
     - added migration code to convert old my_stations to new system
+    - fixed unicode in custom station title
 
 2.0.0 (unreleased)
     - Code Rewrite
