@@ -219,7 +219,7 @@ def __add_stations(stations, add_custom=False):
             ))
         items.append({
             'label': station.get('name', ''),
-            'thumbnail': station.get('thumbnail', '').replace('_1_', '_4_'),
+            'thumbnail': station.get('thumbnail_trans', ''),
             'icon': station.get('thumbnail', ''),
             'info': {
                 'title': station.get('name', ''),

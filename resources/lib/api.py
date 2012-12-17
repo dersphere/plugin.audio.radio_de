@@ -181,8 +181,12 @@ class RadioApi():
         formated_stations = []
         for station in stations:
             if station.get('picture1TransName'):
-                thumbnail = station['pictureBaseURL'] + station['picture1TransName']
-            elif station.get('picture1Name'):
+                thumbnail_trans = (
+                    station['pictureBaseURL'] + station['picture1TransName']
+                ).replace('_1_', '_4_')
+            else:
+                thumbnail_trans = ''
+            if station.get('picture1Name'):
                 thumbnail = station['pictureBaseURL'] + station['picture1Name']
             else:
                 thumbnail = ''
@@ -192,6 +196,7 @@ class RadioApi():
             formated_stations.append({
                 'name': station['name'],
                 'thumbnail': thumbnail,
+                'thumbnail_trans': thumbnail,
                 'rating': station['rating'],
                 'genre': genre,
                 'bitrate': station['bitrate'],
