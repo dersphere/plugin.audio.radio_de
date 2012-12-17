@@ -180,7 +180,9 @@ class RadioApi():
     def __format_stations(stations):
         formated_stations = []
         for station in stations:
-            if station['picture1Name']:
+            if station.get('picture1TransName'):
+                thumbnail = station['pictureBaseURL'] + station['picture1TransName']
+            elif station.get('picture1Name'):
                 thumbnail = station['pictureBaseURL'] + station['picture1Name']
             else:
                 thumbnail = ''
