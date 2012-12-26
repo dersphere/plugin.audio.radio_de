@@ -135,8 +135,6 @@ class RadioApi():
                  % (path, param))
         url = '%s/%s' % (self.api_url, path)
         if param:
-            # fix urllib's unicode handling in urlencode
-            param = dict((k, v.encode('utf-8')) for (k, v) in param.items())
             url += '?%s' % urlencode(param)
         response = self.__urlopen(url)
         json_data = json.loads(response)
