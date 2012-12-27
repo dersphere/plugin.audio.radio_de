@@ -143,15 +143,14 @@ class RadioApi():
     def __resolve_playlist(self, stream_url):
         self.log('__resolve_playlist started with stream_url=%s'
                  % stream_url)
-        stream_url = stream_url.lower()
-        if stream_url.endswith('m3u'):
+        if stream_url.lower().endswith('m3u'):
             response = self.__urlopen(stream_url)
             self.log('__resolve_playlist found .m3u file')
             for line in response.splitlines():
                 if line and not line.strip().startswith('#'):
                     stream_url = line.strip()
                     break
-        elif stream_url.endswith('pls'):
+        elif stream_url.lower().endswith('pls'):
             response = self.__urlopen(stream_url)
             self.log('__resolve_playlist found .pls file')
             for line in response.splitlines():
