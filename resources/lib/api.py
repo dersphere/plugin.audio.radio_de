@@ -19,6 +19,7 @@
 import simplejson as json
 from urllib import urlencode
 from urllib2 import urlopen, Request, HTTPError, URLError
+import random
 
 
 class RadioApiError(Exception):
@@ -143,20 +144,24 @@ class RadioApi():
     def __resolve_playlist(self, stream_url):
         self.log('__resolve_playlist started with stream_url=%s'
                  % stream_url)
+        servers = []
         if stream_url.lower().endswith('m3u'):
             response = self.__urlopen(stream_url)
             self.log('__resolve_playlist found .m3u file')
-            for line in response.splitlines():
-                if line and not line.strip().startswith('#'):
-                    stream_url = line.strip()
-                    break
+            servers = [
+                l for l in response.splitlines()
+                if l.strip() and not l.strip().startswith('#')
+            ]
         elif stream_url.lower().endswith('pls'):
             response = self.__urlopen(stream_url)
             self.log('__resolve_playlist found .pls file')
-            for line in response.splitlines():
-                if line.strip().startswith('File1'):
-                    stream_url = line.split('=')[1]
-                    break
+            servers = [
+                l.split('=')[1] for l in response.splitlines()
+                if l.lower().startswith('file')
+            ]
+        if servers:
+            self.log('__resolve_playlist found %d servers' % len(servers))
+            return random.choice(servers)
         return stream_url
 
     def __urlopen(self, url):
