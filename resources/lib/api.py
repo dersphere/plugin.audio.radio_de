@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import simplejson as json
+import json
 from urllib import urlencode
 from urllib2 import urlopen, Request, HTTPError, URLError
 import random
