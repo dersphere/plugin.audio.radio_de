@@ -177,29 +177,25 @@ class RadioApi():
     def __format_stations(stations):
         formated_stations = []
         for station in stations:
-            if station.get('picture1TransName'):
-                thumbnail_trans = (
-                    station['pictureBaseURL'] + station['picture1TransName']
-                ).replace('_1_', '_4_')
-            else:
-                thumbnail_trans = ''
-            if station.get('picture1Name'):
-                thumbnail = station['pictureBaseURL'] + station['picture1Name']
-            else:
-                thumbnail = ''
+            thumbnail = (
+                station.get('picture4TransName') or
+                station.get('picture4Name') or
+                station.get('picture1TransName').replace('_1_', '_4_') or
+                station.get('picture1Name').replace('_1_', '_4_')
+            )
             genre = station.get('genresAndTopics') or ','.join(
                 station.get('genres', []) + station.get('topics', []),
             )
             formated_stations.append({
                 'name': station['name'],
-                'thumbnail': thumbnail,
-                'thumbnail_trans': thumbnail,
+                'thumbnail': station['pictureBaseURL'] + thumbnail,
                 'rating': station['rating'],
                 'genre': genre,
                 'bitrate': station['bitrate'],
                 'id': station['id'],
                 'current_track': station['currentTrack'],
-                'stream_url': station.get('streamURL', '')
+                'stream_url': station.get('streamURL', ''),
+                'description': station.get('description', '')
             })
         return formated_stations
 
