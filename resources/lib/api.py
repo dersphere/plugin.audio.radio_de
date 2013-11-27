@@ -40,7 +40,7 @@ class RadioApi():
 
     USER_AGENT = 'XBMC Addon Radio'
 
-    PLAYLIST_PREFIXES = ('m3u', 'pls')
+    PLAYLIST_PREFIXES = ('m3u', 'pls', 'asx')
 
     def __init__(self, language='english', user_agent=USER_AGENT):
         self.set_language(language)
@@ -159,6 +159,13 @@ class RadioApi():
             servers = [
                 l.split('=')[1] for l in response.splitlines()
                 if l.lower().startswith('file')
+            ]
+        elif stream_url.lower().endswith('asx'):
+            response = self.__urlopen(stream_url)
+            self.log('__resolve_playlist found .asx file')
+            servers = [
+                l.split('href="')[1].split('"')[0]
+                for l in response.splitlines() if 'href' in l
             ]
         if servers:
             self.log('__resolve_playlist found %d servers' % len(servers))
