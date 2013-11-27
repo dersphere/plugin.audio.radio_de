@@ -105,6 +105,7 @@ class RadioApi():
             'q': search_string,
             'start': '0',
             'rows': '10000',
+            'streamcontentformats': 'aac,mp3',
         }
         stations = self.__api_call(path, param)
         return self.__format_stations(stations)
