@@ -40,7 +40,7 @@ class RadioApi():
 
     USER_AGENT = 'XBMC Addon Radio'
 
-    PLAYLIST_PREFIXES = ('m3u', 'pls', 'asx')
+    PLAYLIST_PREFIXES = ('m3u', 'pls', 'asx', 'xml')
 
     def __init__(self, language='english', user_agent=USER_AGENT):
         self.set_language(language)
@@ -118,7 +118,7 @@ class RadioApi():
         station = self.__api_call(path, param)
         if resolve_playlists and self.__check_paylist(station['streamURL']):
             playlist_url = station['streamURL']
-            station['streamURL'] = self.__resolve_playlist(playlist_url)
+            station['streamURL'] = self.__resolve_playlist(station)
         stations = (station, )
         return self.__format_stations(stations)[0]
 
@@ -142,10 +142,11 @@ class RadioApi():
         json_data = json.loads(response)
         return json_data
 
-    def __resolve_playlist(self, stream_url):
-        self.log('__resolve_playlist started with stream_url=%s'
-                 % stream_url)
+    def __resolve_playlist(self, station):
+        self.log('__resolve_playlist started with station=%s'
+                 % station['id'])
         servers = []
+        stream_url = station['streamURL']
         if stream_url.lower().endswith('m3u'):
             response = self.__urlopen(stream_url)
             self.log('__resolve_playlist found .m3u file')
@@ -166,6 +167,13 @@ class RadioApi():
             servers = [
                 l.split('href="')[1].split('"')[0]
                 for l in response.splitlines() if 'href' in l
+            ]
+        elif stream_url.lower().endswith('xml'):
+            self.log('__resolve_playlist found .xml file')
+            servers = [
+                stream_url['streamUrl']
+                for stream_url in station.get('streamUrls', [])
+                if 'streamUrl' in stream_url
             ]
         if servers:
             self.log('__resolve_playlist found %d servers' % len(servers))
